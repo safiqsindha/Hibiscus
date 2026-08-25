@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Collection, Literal
 
 from .artifact import Artifact
 from .cache import CacheKey, JudgeCache
@@ -56,14 +56,28 @@ class ComparisonRecord:
 
 
 def sample_references(
-    pool: Pool, *, tier: "Tier | str" = Tier.LOVE, k: int = 2, seed: int
+    pool: Pool,
+    *,
+    tier: "Tier | str" = Tier.LOVE,
+    k: int = 2,
+    seed: int,
+    exclude_ids: "Collection[str] | None" = None,
 ) -> list[Artifact]:
-    """Deterministically sample ``k`` references from ``tier`` of ``pool``."""
+    """Deterministically sample ``k`` references from ``tier`` of ``pool``.
+
+    ``exclude_ids`` drops artifacts from the population before sampling —
+    used during calibration so a pool member scored as a candidate is
+    never compared against itself.
+    """
     tier = parse_tier(tier)
     candidates = pool.filter_by_tier(tier)
+    if exclude_ids:
+        excluded = set(exclude_ids)
+        candidates = [r for r in candidates if r.id not in excluded]
     if len(candidates) < k:
         raise ValueError(
-            f"pool has only {len(candidates)} artifacts in tier {tier.value!r}; need at least {k}"
+            f"pool has only {len(candidates)} eligible artifacts in tier {tier.value!r}; "
+            f"need at least {k}"
         )
     sampled = sample_deterministic(candidates, k, seed, key=lambda r: r.id)
     return [r.artifact for r in sampled]
@@ -81,6 +95,7 @@ def run_comparisons(
     model: str = "unknown",
     cache: "JudgeCache | None" = None,
     dimension: str = "overall",
+    exclude_ids: "Collection[str] | None" = None,
     now: "Callable[[], str] | None" = None,
 ) -> list[ComparisonRecord]:
     """Compare ``candidate`` against ``k`` references sampled from ``tier``.
@@ -88,11 +103,14 @@ def run_comparisons(
     Every (candidate, reference) pair is judged in both orders —
     candidate-first and reference-first — to control for position bias.
     Results are looked up in ``cache`` first when provided.
+
+    ``exclude_ids`` is forwarded to reference sampling; pass the
+    candidate's own id when scoring an artifact that lives in the pool.
     """
     question = question or DEFAULT_QUESTION
     prompt_hash = sha256_hex(question)
     candidate_hash = sha256_hex(candidate.text)
-    references = sample_references(pool, tier=tier, k=k, seed=seed)
+    references = sample_references(pool, tier=tier, k=k, seed=seed, exclude_ids=exclude_ids)
     stamp = now or (lambda: datetime.now(timezone.utc).isoformat())
 
     records: list[ComparisonRecord] = []

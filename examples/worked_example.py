@@ -2,8 +2,14 @@
 
 Builds a small love-tier reference pool, compares two candidates against
 it with the deterministic MockJudge, scores them with Wilson intervals,
-and runs the correlation diagnostic on a synthetic rubric with a
-deliberately duplicated dimension.
+calibrates the judge against the pool's own tiers, demonstrates the
+spread check catching a set where nothing separates, and runs the
+correlation diagnostic on a synthetic rubric with a deliberately
+duplicated dimension.
+
+Note that calibration *fails* in this run, on purpose: MockJudge decides
+by hashing text, so it has no taste to reproduce. That is the check
+doing its job.
 
 Run with:
     pip install -e .
@@ -16,10 +22,11 @@ import tempfile
 from pathlib import Path
 
 from hibiscus import Artifact, JudgeCache, Pool, RatedArtifact, Tier
-from hibiscus.compare import order_disagreement_rate, run_comparisons
+from hibiscus.calibrate import run_calibration
+from hibiscus.compare import ComparisonRecord, order_disagreement_rate, run_comparisons
 from hibiscus.judge.mock import MockJudge
 from hibiscus.report import ScoreRow, build_correlation_report
-from hibiscus.score import score_candidate
+from hibiscus.score import score_candidate, score_spread
 
 LOVE_POOL = [
     "The kettle sings before the sun clears the ridge.",
@@ -60,6 +67,61 @@ def run_compare_and_score(pool: Pool, cache_path: Path) -> None:
         )
 
 
+def run_calibration_check(pool: Pool, cache_path: Path) -> None:
+    """Score the pool's own tiers as candidates — do they rank as rated?"""
+    report = run_calibration(
+        pool,
+        MockJudge(),
+        k=2,
+        seed=7,
+        model="mock-v1",
+        cache=JudgeCache(cache_path),
+    )
+
+    for tier in report.tiers_high_to_low:
+        cal = report.by_tier[tier]
+        wr = cal.win_rate
+        print(
+            f"{tier.value:>7}: {wr.point_estimate:6.1%} "
+            f"[{wr.lower:.1%}, {wr.upper:.1%}] over {wr.n} comparisons"
+        )
+    verdict = "PASS" if report.ordering_holds else "FAIL"
+    print(f"  -> {verdict}; separation {report.separation:.1%}")
+    if not report.ordering_holds:
+        print(
+            "     ...which is the correct answer here: MockJudge hashes text and has\n"
+            "     no taste at all, so it cannot reproduce a human tier ordering. A real\n"
+            "     judge that failed this check would be telling you the same thing."
+        )
+
+
+def run_spread_check() -> None:
+    """Show the compression failure being detected rather than hidden."""
+    flat = [
+        ComparisonRecord(
+            candidate_id=f"c{c}",
+            reference_id=f"r{i}",
+            order="candidate_first",
+            winner="candidate" if i < 3 else "reference",
+            raw_response="x",
+            model="mock-v1",
+            prompt_hash="p",
+            timestamp="t",
+            cache_hit=False,
+        )
+        for c in range(6)
+        for i in range(6)
+    ]
+
+    spread = score_spread(flat)
+    ratio = "n/a" if spread.dispersion_ratio is None else f"{spread.dispersion_ratio:.2f}x"
+    print(
+        f"six candidates, each {spread.mean:.0%}: "
+        f"spread {spread.minimum:.0%}–{spread.maximum:.0%}, {ratio} sampling noise"
+    )
+    print(f"  -> discriminating: {spread.discriminating} (this is the failure mode, caught)")
+
+
 def run_correlation_diagnostic() -> None:
     scores = {"art-1": 0.9, "art-2": 0.3, "art-3": 0.6, "art-4": 0.8, "art-5": 0.1}
     rows = []
@@ -90,6 +152,12 @@ def main() -> None:
 
         print("== comparing two candidates against the pool ==")
         run_compare_and_score(pool, tmp_path / "cache.jsonl")
+
+        print("\n== calibrating: do the pool's own tiers rank as rated? ==")
+        run_calibration_check(pool, tmp_path / "cache.jsonl")
+
+        print("\n== spread: catching a set where nothing separates ==")
+        run_spread_check()
 
         print("\n== running the correlation diagnostic on synthetic dimension scores ==")
         run_correlation_diagnostic()
