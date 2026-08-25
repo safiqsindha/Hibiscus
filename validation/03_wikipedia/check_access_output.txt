@@ -1,0 +1,100 @@
+Hosts a live Wikipedia quality-class pull would need:
+  en.wikipedia.org: 000
+  dumps.wikimedia.org: 000
+  wikimedia.org: 000
+
+Hosts already confirmed reachable in this sandbox (used elsewhere in this validation):
+  raw.githubusercontent.com / github.com (via this session's git proxy)
+  storage.googleapis.com (used for the SummEval data in ../02_summeval)
+
+Proxy status (recentRelayFailures shows the policy denial):
+{
+  "enabled": true,
+  "port": 46023,
+  "caBundlePath": "/root/.ccr/ca-bundle.crt",
+  "hasSystemCa": true,
+  "noProxy": "localhost,127.0.0.1,::1,127.0.0.0/8,0.0.0.0/8,::,169.254.0.0/16,api.anthropic.com,api-staging.anthropic.com,api-pr-preview.anthropic.com,mcp-proxy.anthropic.com,mcp-proxy-staging.anthropic.com,registry.npmjs.org,jsr.io,npm.jsr.io,pypi.org,files.pythonhosted.org,index.crates.io,proxy.golang.org,host.docker.internal,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,100.64.0.0/10,.svc.cluster.local,*.svc.cluster.local",
+  "selective": false,
+  "standalone": false,
+  "toolScoped": false,
+  "installedProxyPreconfiguredClis": [],
+  "javaTrustStorePath": "/root/.ccr/java-truststore.p12",
+  "readmePath": "/root/.ccr/README.md",
+  "gitConfigInjection": true,
+  "gitSshRewrite": true,
+  "recentRelayFailures": [
+    {
+      "ts": "2026-08-25T17:35:41.395Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "en.wikipedia.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:38:33.172Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "huggingface.co:443"
+    },
+    {
+      "ts": "2026-08-25T17:38:33.436Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "dumps.wikimedia.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:38:33.696Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "commoncrawl.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:38:33.960Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "en.wikipedia.org.readonly.link:443"
+    },
+    {
+      "ts": "2026-08-25T17:38:34.217Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "simple.wikipedia.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:38:34.480Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "wikimedia.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:40:38.279Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "www.gutenberg.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:54:17.167Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "arxiv.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:55:33.189Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "en.wikipedia.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:55:33.419Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "dumps.wikimedia.org:443"
+    },
+    {
+      "ts": "2026-08-25T17:55:33.709Z",
+      "kind": "connect_rejected",
+      "detail": "gateway answered 403 to CONNECT (policy denial or upstream failure)",
+      "host": "wikimedia.org:443"
+    }
+  ]
+}
+

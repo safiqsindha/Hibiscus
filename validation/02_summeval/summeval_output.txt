@@ -1,0 +1,23 @@
+loaded 6400 score rows across 1600 artifacts (article x system)
+dimensions: ['coherence', 'consistency', 'fluency', 'relevance']
+
+=== hibiscus report correlation matrix ===
+	coherence	consistency	fluency	relevance
+coherence	1.0000	0.3151	0.3844	0.6598
+consistency	0.3151	1.0000	0.4884	0.4125
+fluency	0.3844	0.4884	1.0000	0.3696
+relevance	0.6598	0.4125	0.3696	1.0000
+
+redundant pairs (>= 0.85): none
+
+=== independent scipy/numpy recomputation ===
+	coherence	consistency	fluency	relevance
+coherence	1.0000	0.3151	0.3844	0.6598
+consistency	0.3151	1.0000	0.4884	0.4125
+fluency	0.3844	0.4884	1.0000	0.3696
+relevance	0.6598	0.4125	0.3696	1.0000
+
+=== agreement check: hibiscus vs scipy/numpy ===
+max abs difference across all matrix cells: 0.0000000000
+
+wrote /home/user/Hibiscus/validation/02_summeval/summeval_results.json

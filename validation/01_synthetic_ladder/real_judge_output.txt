@@ -1,0 +1,54 @@
+total ManualJudge.compare() calls: 120
+
+=== Win rates by class (mean across candidates), real-judge subset ===
+       src-00__truncated: 0% (0/2, 0 ties)
+       src-03__truncated: 0% (0/2, 0 ties)
+       src-07__truncated: 0% (0/2, 0 ties)
+       src-11__truncated: 0% (0/2, 0 ties)
+       src-15__truncated: 0% (0/2, 0 ties)
+  ->  truncated mean: 0.0%
+
+        src-00__shuffled: 0% (0/2, 0 ties)
+        src-03__shuffled: 0% (0/2, 0 ties)
+        src-07__shuffled: 0% (0/2, 0 ties)
+        src-11__shuffled: 0% (0/2, 0 ties)
+        src-15__shuffled: 0% (0/2, 0 ties)
+  ->   shuffled mean: 0.0%
+
+          src-00__padded: 0% (0/2, 0 ties)
+          src-03__padded: 0% (0/2, 0 ties)
+          src-07__padded: 0% (0/2, 0 ties)
+          src-11__padded: 0% (0/2, 0 ties)
+          src-15__padded: 0% (0/2, 0 ties)
+  ->     padded mean: 0.0%
+
+        src-00__stripped: 0% (0/2, 0 ties)
+        src-03__stripped: 0% (0/2, 0 ties)
+        src-07__stripped: 0% (0/2, 0 ties)
+        src-11__stripped: 0% (0/2, 0 ties)
+        src-15__stripped: 0% (0/2, 0 ties)
+  ->   stripped mean: 0.0%
+
+          src-00__intact: 100% (1/1, 1 ties)
+          src-03__intact: 100% (1/1, 1 ties)
+          src-07__intact: 0% (0/2, 0 ties)
+          src-11__intact: 0% (0/1, 1 ties)
+          src-15__intact: n/a (0/0, 2 ties)
+  ->     intact mean: 50.0%
+
+                  ctl-00: 0% (0/2, 0 ties)
+                  ctl-01: 0% (0/2, 0 ties)
+                  ctl-02: 0% (0/2, 0 ties)
+                  ctl-03: 0% (0/2, 0 ties)
+                  ctl-04: 0% (0/2, 0 ties)
+  ->    control mean: 0.0%
+
+=== Spread check per class ===
+   truncated: n=5 spread 0%-0% (sd 0.000, n/a) discriminating=False
+    shuffled: n=5 spread 0%-0% (sd 0.000, n/a) discriminating=False
+      padded: n=5 spread 0%-0% (sd 0.000, n/a) discriminating=False
+    stripped: n=5 spread 0%-0% (sd 0.000, n/a) discriminating=False
+      intact: n=4 spread 0%-100% (sd 0.577, 1.26x) discriminating=True
+     control: n=5 spread 0%-0% (sd 0.000, n/a) discriminating=False
+
+wrote /home/user/Hibiscus/validation/01_synthetic_ladder/real_judge_results.json

@@ -1,0 +1,966 @@
+{
+  "win_rates": {
+    "truncated": {
+      "per_candidate": {
+        "src-00__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-01__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-02__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-03__truncated": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-04__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-05__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-06__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-07__truncated": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-08__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-09__truncated": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-10__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-11__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-12__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-13__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-14__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-15__truncated": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-16__truncated": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-17__truncated": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-18__truncated": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-19__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.6200000000000001,
+      "n_candidates": 20
+    },
+    "shuffled": {
+      "per_candidate": {
+        "src-00__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-01__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-02__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-03__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-04__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-05__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-06__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-07__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-08__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-09__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-10__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-11__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-12__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-13__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-14__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-15__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-16__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-17__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-18__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-19__shuffled": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.6300000000000001,
+      "n_candidates": 20
+    },
+    "padded": {
+      "per_candidate": {
+        "src-00__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-01__padded": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-02__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-03__padded": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-04__padded": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-05__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-06__padded": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-07__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-08__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-09__padded": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-10__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-11__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-12__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-13__padded": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-14__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-15__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-16__padded": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-17__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-18__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-19__padded": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.5700000000000001,
+      "n_candidates": 20
+    },
+    "stripped": {
+      "per_candidate": {
+        "src-00__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-01__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-02__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-03__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-04__stripped": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-05__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-06__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-07__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-08__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-09__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-10__stripped": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-11__stripped": {
+          "has_signal": true,
+          "win_rate": 0.2,
+          "wins": 1,
+          "n": 5,
+          "ties": 0
+        },
+        "src-12__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-13__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-14__stripped": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-15__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-16__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-17__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-18__stripped": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-19__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.6700000000000002,
+      "n_candidates": 20
+    },
+    "intact": {
+      "per_candidate": {
+        "src-00__intact": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-01__intact": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-02__intact": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-03__intact": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "src-04__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-05__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-06__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-07__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-08__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-09__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-10__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-11__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-12__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-13__intact": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "src-14__intact": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-15__intact": {
+          "has_signal": true,
+          "win_rate": 0.2,
+          "wins": 1,
+          "n": 5,
+          "ties": 0
+        },
+        "src-16__intact": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "src-17__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "src-18__intact": {
+          "has_signal": true,
+          "win_rate": 0.6,
+          "wins": 3,
+          "n": 5,
+          "ties": 0
+        },
+        "src-19__intact": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.7100000000000002,
+      "n_candidates": 20
+    },
+    "control": {
+      "per_candidate": {
+        "ctl-00": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-01": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-02": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-03": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-04": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-05": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-06": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-07": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-08": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-09": {
+          "has_signal": true,
+          "win_rate": 0.4,
+          "wins": 2,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-10": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-11": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-12": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-13": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-14": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-15": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-16": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-17": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-18": {
+          "has_signal": true,
+          "win_rate": 0.8,
+          "wins": 4,
+          "n": 5,
+          "ties": 0
+        },
+        "ctl-19": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 5,
+          "n": 5,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.6600000000000003,
+      "n_candidates": 20
+    }
+  },
+  "spread": {
+    "truncated": {
+      "n_candidates": 20,
+      "mean": 0.6200000000000001,
+      "stdev": 0.3548164833292068,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "dispersion_ratio": 1.6345610515102482,
+      "discriminating": true
+    },
+    "shuffled": {
+      "n_candidates": 20,
+      "mean": 0.6300000000000001,
+      "stdev": 0.2364206776957237,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "dispersion_ratio": 1.094962695349235,
+      "discriminating": false
+    },
+    "padded": {
+      "n_candidates": 20,
+      "mean": 0.5700000000000001,
+      "stdev": 0.2921787484616764,
+      "minimum": 0.0,
+      "maximum": 0.8,
+      "dispersion_ratio": 1.3196597506398473,
+      "discriminating": true
+    },
+    "stripped": {
+      "n_candidates": 20,
+      "mean": 0.6700000000000002,
+      "stdev": 0.28488224714229227,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "dispersion_ratio": 1.354740197470456,
+      "discriminating": true
+    },
+    "control": {
+      "n_candidates": 20,
+      "mean": 0.6600000000000003,
+      "stdev": 0.2909150717088553,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "dispersion_ratio": 1.3732189806081565,
+      "discriminating": true
+    },
+    "intact": {
+      "n_candidates": 20,
+      "mean": 0.7100000000000002,
+      "stdev": 0.25526044491233285,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "dispersion_ratio": 1.257883298188329,
+      "discriminating": true
+    }
+  },
+  "calibration": {
+    "truncated": {
+      "love_win_rate": 0.71,
+      "okay_win_rate": 0.62,
+      "ordering_holds": true,
+      "inversions": [],
+      "separation": 0.08999999999999997
+    },
+    "shuffled": {
+      "love_win_rate": 0.71,
+      "okay_win_rate": 0.63,
+      "ordering_holds": true,
+      "inversions": [],
+      "separation": 0.07999999999999996
+    },
+    "padded": {
+      "love_win_rate": 0.71,
+      "okay_win_rate": 0.57,
+      "ordering_holds": true,
+      "inversions": [],
+      "separation": 0.14
+    },
+    "stripped": {
+      "love_win_rate": 0.71,
+      "okay_win_rate": 0.67,
+      "ordering_holds": true,
+      "inversions": [],
+      "separation": 0.039999999999999925
+    }
+  }
+}
