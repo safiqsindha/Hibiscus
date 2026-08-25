@@ -178,6 +178,33 @@ made a model hallucinate, while a short, opinionated allowlist outperformed
 the full spec. Override the question per-call (`--question` / `question=`)
 if you need to steer it, but keep it short.
 
+### Why pairwise, and not listwise
+
+Each judge call sees exactly two texts: the candidate and one reference.
+Sampling `k=2` references means four calls per candidate (two references ×
+two orders), not one call showing the judge everything at once. Bundling
+all the references into a single call is cheaper, and it is the obvious
+thing to reach for, so it's worth saying why this library doesn't:
+
+- **Position control stays exact.** "Run it in both orders" is well-defined
+  for two texts. Three texts have six orderings, so you'd have to sample or
+  rotate, and the order-disagreement rate — a headline reliability signal
+  here — would stop being a clean flip rate.
+- **The Wilson interval stays honest.** It assumes independent Bernoulli
+  trials, which is precisely what one-vs-one comparisons produce. A single
+  call ranking N+1 texts is multinomial; collapsing it to won/lost both
+  discards information and quietly breaks the independence assumption.
+- **The cache stays useful.** Keys are per (candidate, reference) pair, so
+  resampling references reuses whatever overlaps. Keyed on a whole bundle,
+  swapping one reference would invalidate the entire call.
+- **The prompt stays short**, for the reason described just above — and
+  "which of these two is better" is the simplest possible relative
+  question, which is the whole reason for preferring comparison over
+  absolute scoring in the first place.
+
+The cost lever is `k` (and the cache, and the choice of judge model), none
+of which change the adapter interface.
+
 ## Determinism and reproducibility
 
 - Reference sampling is seeded (`random.Random(seed)`); the same seed
