@@ -62,8 +62,12 @@ class AnthropicJudge(JudgeAdapter):
 
 def _parse_winner(raw: str) -> "str":
     cleaned = raw.strip().upper()
+    # Check TIE first: it also starts with "T", but "A"/"B" prefixes would
+    # otherwise never collide with it.
+    if cleaned.startswith("TIE") or cleaned == "T":
+        return "tie"
     if cleaned.startswith("A"):
         return "a"
     if cleaned.startswith("B"):
         return "b"
-    raise ValueError(f"could not parse judge response as A/B: {raw!r}")
+    raise ValueError(f"could not parse judge response as A/B/TIE: {raw!r}")

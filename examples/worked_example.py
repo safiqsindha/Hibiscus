@@ -62,8 +62,8 @@ def run_compare_and_score(pool: Pool, cache_path: Path) -> None:
         disagreement = order_disagreement_rate(records)
         print(
             f"{name:>7}: win rate {result.point_estimate:.0%} "
-            f"[{result.lower:.0%}, {result.upper:.0%}] over {result.n} comparisons, "
-            f"order-disagreement {disagreement:.0%}"
+            f"[{result.lower:.0%}, {result.upper:.0%}] over {result.n} decisive pairs "
+            f"({result.summary.ties} tied), order-disagreement {disagreement:.0%}"
         )
 
 
@@ -81,12 +81,17 @@ def run_calibration_check(pool: Pool, cache_path: Path) -> None:
     for tier in report.tiers_high_to_low:
         cal = report.by_tier[tier]
         wr = cal.win_rate
+        if not wr.has_signal:
+            print(f"{tier.value:>7}:  no signal — every pair tied")
+            continue
         print(
             f"{tier.value:>7}: {wr.point_estimate:6.1%} "
-            f"[{wr.lower:.1%}, {wr.upper:.1%}] over {wr.n} comparisons"
+            f"[{wr.lower:.1%}, {wr.upper:.1%}] over {wr.n} decisive pairs"
         )
     verdict = "PASS" if report.ordering_holds else "FAIL"
     print(f"  -> {verdict}; separation {report.separation:.1%}")
+    for higher, lower in report.inversions:
+        print(f"     inversion: {lower.value!r} outscored {higher.value!r}")
     if not report.ordering_holds:
         print(
             "     ...which is the correct answer here: MockJudge hashes text and has\n"

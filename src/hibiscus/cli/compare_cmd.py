@@ -9,6 +9,7 @@ from pathlib import Path
 from ..artifact import Artifact
 from ..cache import JudgeCache
 from ..compare import order_disagreement_rate, run_comparisons, save_comparisons
+from ..pairs import resolve_pairs, summarize_pairs
 from ..pool import Pool
 
 
@@ -77,9 +78,15 @@ def _handle(args) -> int:
 
     disagreement = order_disagreement_rate(all_records)
     hits = sum(1 for r in all_records if r.cache_hit)
+    summary = summarize_pairs(resolve_pairs(all_records))
     print(
-        f"ran {len(all_records)} comparisons across {len(candidates)} candidate(s); "
-        f"{hits} served from cache; order-disagreement rate = {disagreement:.2%}"
+        f"ran {len(all_records)} judge calls over {summary.total} pairs across "
+        f"{len(candidates)} candidate(s); {hits} served from cache"
+    )
+    print(
+        f"resolved: {summary.wins} win, {summary.losses} loss, {summary.ties} tie "
+        f"({summary.judge_ties} judge, {summary.disagreement_ties} order-disagreement); "
+        f"order-disagreement rate = {disagreement:.2%}"
     )
     if disagreement > 0.3:
         print(

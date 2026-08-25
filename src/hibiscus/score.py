@@ -1,4 +1,9 @@
-"""Aggregate comparisons into win rates with Wilson score intervals."""
+"""Aggregate comparisons into win rates with Wilson score intervals.
+
+Scoring works on *pairs*, not on individual judge calls: the two orders
+of a comparison are resolved into one outcome first (see
+:mod:`hibiscus.pairs`), and ties are excluded from the denominator.
+"""
 
 from __future__ import annotations
 
@@ -8,11 +13,20 @@ from dataclasses import dataclass
 from typing import Iterable
 
 from .compare import ComparisonRecord
+from .pairs import PairOutcome, PairSummary, count_legacy_records, resolve_pairs, summarize_pairs
+
+#: |r| at or above which length correlation is called out. Heuristic.
+LENGTH_BIAS_THRESHOLD = 0.4
 
 
 @dataclass(frozen=True)
 class WinRateResult:
-    """A win rate with its Wilson score confidence interval."""
+    """A win rate with its Wilson score confidence interval.
+
+    ``n`` counts *decisive pairs* — ties are excluded — so ``wins/n`` is
+    the share of comparisons the candidate actually won. ``summary``
+    carries the tie counts that ``n`` leaves out.
+    """
 
     wins: int
     n: int
@@ -20,6 +34,12 @@ class WinRateResult:
     lower: float
     upper: float
     z: float = 1.96
+    summary: "PairSummary | None" = None
+
+    @property
+    def has_signal(self) -> bool:
+        """False when every pair tied, so no win rate is defined."""
+        return self.n > 0
 
 
 def wilson_interval(wins: int, n: int, z: float = 1.96) -> WinRateResult:
@@ -49,6 +69,19 @@ def wilson_interval(wins: int, n: int, z: float = 1.96) -> WinRateResult:
     )
 
 
+def _select(
+    records: Iterable[ComparisonRecord],
+    candidate_id: "str | None",
+    dimension: "str | None",
+) -> list[ComparisonRecord]:
+    return [
+        r
+        for r in records
+        if (candidate_id is None or r.candidate_id == candidate_id)
+        and (dimension is None or r.dimension == dimension)
+    ]
+
+
 def score_candidate(
     records: Iterable[ComparisonRecord],
     *,
@@ -56,18 +89,26 @@ def score_candidate(
     dimension: "str | None" = None,
     z: float = 1.96,
 ) -> WinRateResult:
-    """Win rate for one candidate (optionally on one dimension) across records."""
-    wins = 0
-    n = 0
-    for r in records:
-        if candidate_id is not None and r.candidate_id != candidate_id:
-            continue
-        if dimension is not None and r.dimension != dimension:
-            continue
-        n += 1
-        if r.winner == "candidate":
-            wins += 1
-    return wilson_interval(wins, n, z=z)
+    """Win rate for one candidate (optionally on one dimension).
+
+    Both orders of each comparison are resolved into a single pair
+    outcome before counting, and ties are excluded from the denominator.
+    When every pair ties, the result carries ``n == 0`` and
+    ``has_signal`` is False rather than raising or inventing a rate.
+    """
+    selected = _select(records, candidate_id, dimension)
+    outcomes = resolve_pairs(selected)
+    summary = summarize_pairs(outcomes, legacy_records=count_legacy_records(selected))
+    result = wilson_interval(summary.wins, summary.decisive, z=z)
+    return WinRateResult(
+        wins=result.wins,
+        n=result.n,
+        point_estimate=result.point_estimate,
+        lower=result.lower,
+        upper=result.upper,
+        z=result.z,
+        summary=summary,
+    )
 
 
 def score_all(
@@ -78,6 +119,90 @@ def score_all(
     for r in records:
         grouped[(r.candidate_id, r.dimension)].append(r)
     return {key: score_candidate(rs, z=z) for key, rs in grouped.items()}
+
+
+@dataclass(frozen=True)
+class LengthBiasResult:
+    """Correlation between candidate text length and win rate.
+
+    Length is the second-best-documented pairwise judge bias after
+    position: judges over-prefer longer texts on tasks that do not
+    penalize verbosity. This is reported, never corrected for — what to
+    do about it depends on whether length is legitimately part of quality
+    for the artifacts being judged, which only the caller knows.
+    """
+
+    n_candidates: int
+    correlation: "float | None"
+    threshold: float
+    flagged: bool
+    missing_lengths: int
+
+    def to_dict(self) -> dict:
+        return {
+            "n_candidates": self.n_candidates,
+            "correlation": self.correlation,
+            "threshold": self.threshold,
+            "flagged": self.flagged,
+            "missing_lengths": self.missing_lengths,
+        }
+
+
+def length_bias(
+    records: Iterable[ComparisonRecord],
+    *,
+    dimension: "str | None" = None,
+    threshold: float = LENGTH_BIAS_THRESHOLD,
+    lengths: "dict[str, int] | None" = None,
+) -> LengthBiasResult:
+    """Correlate candidate text length against win rate across candidates.
+
+    Lengths come from the comparison records themselves (recorded at
+    compare time). ``lengths`` overrides them, for records written before
+    the field existed.
+    """
+    from .report import pearson
+
+    selected = _select(records, None, dimension)
+    grouped: dict[str, list[ComparisonRecord]] = defaultdict(list)
+    for r in selected:
+        grouped[r.candidate_id].append(r)
+
+    xs: list[float] = []
+    ys: list[float] = []
+    missing = 0
+    for candidate_id, group in sorted(grouped.items()):
+        if lengths is not None and candidate_id in lengths:
+            length = lengths[candidate_id]
+        else:
+            found = [r.candidate_length for r in group if r.candidate_length is not None]
+            if not found:
+                missing += 1
+                continue
+            length = found[0]
+        result = score_candidate(group)
+        if not result.has_signal:
+            continue
+        xs.append(float(length))
+        ys.append(result.point_estimate)
+
+    if len(xs) < 2:
+        return LengthBiasResult(
+            n_candidates=len(xs),
+            correlation=None,
+            threshold=threshold,
+            flagged=False,
+            missing_lengths=missing,
+        )
+
+    corr = pearson(xs, ys)
+    return LengthBiasResult(
+        n_candidates=len(xs),
+        correlation=corr,
+        threshold=threshold,
+        flagged=abs(corr) >= threshold,
+        missing_lengths=missing,
+    )
 
 
 @dataclass(frozen=True)
@@ -132,7 +257,9 @@ def score_spread(
             continue
         per_candidate[r.candidate_id].append(r)
 
+    # Candidates whose every pair tied have no win rate to spread.
     results = [score_candidate(rs) for rs in per_candidate.values()]
+    results = [r for r in results if r.has_signal]
     rates = [r.point_estimate for r in results]
     n = len(rates)
 

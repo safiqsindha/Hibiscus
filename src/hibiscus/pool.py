@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Iterable, Iterator
 
 from .artifact import Artifact
 from .tiers import Tier, parse_tier
@@ -61,11 +61,24 @@ class Pool:
     always resumable and safe to reopen mid-session.
     """
 
-    def __init__(self, path: "str | Path"):
-        self.path = Path(path)
+    def __init__(self, path: "str | Path | None"):
+        self.path = Path(path) if path is not None else None
         self._by_id: dict[str, RatedArtifact] = {}
-        if self.path.exists():
+        if self.path is not None and self.path.exists():
             self._load()
+
+    @classmethod
+    def in_memory(cls, rated: "Iterable[RatedArtifact]") -> "Pool":
+        """A pool with no backing file, for transient reference sets.
+
+        Used where a set of artifacts needs to act as an opponent pool
+        without being persisted — round-robin ranking, for instance.
+        Adding to it works; it just never touches disk.
+        """
+        pool = cls(None)
+        for item in rated:
+            pool._by_id[item.id] = item
+        return pool
 
     def _load(self) -> None:
         with self.path.open("r", encoding="utf-8") as fh:
@@ -95,6 +108,8 @@ class Pool:
                 f"artifact {rated.id!r} is already rated; pass overwrite=True to replace"
             )
         self._by_id[rated.id] = rated
+        if self.path is None:
+            return
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(rated.to_dict(), ensure_ascii=False) + "\n")
@@ -127,6 +142,8 @@ class Pool:
 
     def rewrite(self) -> None:
         """Compact the backing file, dropping stale rows left by an overwrite."""
+        if self.path is None:
+            raise ValueError("in-memory pool has no backing file to rewrite")
         tmp = self.path.with_suffix(self.path.suffix + ".tmp")
         with tmp.open("w", encoding="utf-8") as fh:
             for rated in self.list():
