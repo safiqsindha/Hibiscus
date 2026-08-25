@@ -60,6 +60,7 @@ class CalibrationReport:
     inversions: list[tuple[Tier, Tier]]
     separation: "float | None"
     records: list[ComparisonRecord]
+    tiers_without_signal: list[Tier]
 
     @property
     def tiers_high_to_low(self) -> list[Tier]:
@@ -70,6 +71,7 @@ class CalibrationReport:
             "reference_tier": self.reference_tier.value,
             "ordering_holds": self.ordering_holds,
             "inversions": [[hi.value, lo.value] for hi, lo in self.inversions],
+            "tiers_without_signal": [t.value for t in self.tiers_without_signal],
             "separation": self.separation,
             "tiers": {
                 tier.value: {
@@ -151,11 +153,23 @@ def run_calibration(
     ordered = sorted(by_tier, key=lambda t: TIER_ORDER[t], reverse=True)
     rates = [by_tier[t].win_rate.point_estimate for t in ordered]
 
+    # A tier whose every pair tied has no win rate at all. Its
+    # point_estimate is 0.0 by convention, which would masquerade as a
+    # genuine zero and could fake a passing ordering, so it invalidates
+    # the check instead.
+    without_signal = [t for t in ordered if not by_tier[t].win_rate.has_signal]
+
     inversions = [
         (ordered[i], ordered[i + 1]) for i in range(len(ordered) - 1) if rates[i] < rates[i + 1]
     ]
     separation = rates[0] - rates[-1] if len(rates) > 1 else None
-    ordering_holds = bool(rates) and not inversions and separation is not None and separation > 0
+    ordering_holds = (
+        bool(rates)
+        and not inversions
+        and not without_signal
+        and separation is not None
+        and separation > 0
+    )
 
     return CalibrationReport(
         reference_tier=reference_tier,
@@ -164,4 +178,5 @@ def run_calibration(
         inversions=inversions,
         separation=separation,
         records=all_records,
+        tiers_without_signal=without_signal,
     )

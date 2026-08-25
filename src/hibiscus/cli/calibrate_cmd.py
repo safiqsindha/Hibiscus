@@ -64,10 +64,17 @@ def _handle(args) -> int:
         cal = report.by_tier[tier]
         wr = cal.win_rate
         capped = f"  (capped from {cal.n_available})" if cal.capped else ""
+        if not wr.has_signal:
+            print(
+                f"  {tier.value:>5}:   no signal — every pair tied  "
+                f"{cal.n_candidates} items{capped}"
+            )
+            continue
+        ties = f", {wr.summary.ties} tied" if wr.summary and wr.summary.ties else ""
         print(
             f"  {tier.value:>5}: {wr.point_estimate:6.1%} "
             f"[{wr.lower:.1%}, {wr.upper:.1%}]  "
-            f"{cal.n_candidates} items, {wr.n} comparisons{capped}"
+            f"{cal.n_candidates} items, {wr.n} decisive pairs{ties}{capped}"
         )
 
     disagreement = order_disagreement_rate(report.records)
@@ -84,7 +91,12 @@ def _handle(args) -> int:
                 f"  inversion: {lower.value!r} outscored {higher.value!r}",
                 file=sys.stderr,
             )
-        if not report.inversions and report.separation == 0:
+        for tier in report.tiers_without_signal:
+            print(
+                f"  no signal for {tier.value!r} — every pair tied, so its rank is undefined",
+                file=sys.stderr,
+            )
+        if not report.inversions and not report.tiers_without_signal and report.separation == 0:
             print(
                 "  every tier scored identically — the judge is not separating them",
                 file=sys.stderr,

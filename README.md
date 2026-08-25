@@ -42,8 +42,9 @@ they quietly dominate a weighted average.
 | **Artifact**    | Any text blob with an id and optional metadata. Domain-agnostic — prose, code, docs, synthetic data. |
 | **Tier**        | `love` / `okay` / `nope`. Exactly three, ordered. `love` is the "hung set" used as comparison foils. |
 | **Pool**        | The rated collection, one artifact kind per pool. Multiple named pools are just multiple files. |
-| **Comparison**  | One judge call: candidate vs. one reference, run in both orders to control for position bias. |
-| **Win rate**    | Fraction of comparisons won, reported with a Wilson score confidence interval. |
+| **Comparison**  | One candidate vs. one reference, judged in both orders to control for position bias. |
+| **Pair outcome**| Those two orders resolved into one result: win, loss, or tie. Ties leave the denominator. |
+| **Win rate**    | Fraction of *decisive pairs* won, reported with a Wilson score confidence interval. |
 
 ## Install
 
@@ -81,6 +82,10 @@ hibiscus score --comparisons comparisons.jsonl --out scores.json
 # 3b. Sanity-check the judge against tiers you already rated. Exits
 #     non-zero if your own okay/nope items don't rank below love.
 hibiscus calibrate --pool pools/my-pool.jsonl --seed 42 --judge anthropic
+
+# 3c. Ask whether the pool is big enough yet, empirically.
+hibiscus saturate --pool pools/my-pool.jsonl --candidates probes.jsonl \
+  --seed 42 --cache cache/judge_cache.jsonl
 
 # 4. Run the correlation diagnostic on any {artifact_id, dimension, score}
 #    data — Hibiscus's own or an existing rubric's history.
@@ -138,6 +143,10 @@ print(score_candidate(records, candidate_id="cand-1"))  # WinRateResult
    running every comparison in both orders. Surfaces the order-disagreement
    rate as a judge-reliability signal: if the judge's answer flips with
    position, it isn't discriminating on content.
+
+   The two orders are **two measurements of one comparison**, so they are
+   resolved into a single outcome before anything is counted — see
+   [How a pair is scored](#how-a-pair-is-scored).
 4. **`score`** — aggregates comparisons into a win rate with a Wilson score
    confidence interval. Supports per-dimension scoring when comparisons
    carry a `dimension`, but a single overall judgment is the default and
@@ -151,11 +160,60 @@ print(score_candidate(records, candidate_id="cand-1"))  # WinRateResult
    to. Uses only rating data you already have, never compares a pool
    item against itself, and exits non-zero on failure so it can gate a
    run.
-6. **`report`** — the correlation diagnostic. Given any set of artifacts
+6. **`saturate`** — the sizing check. Scores probe candidates against
+   reference subsets of growing size and reports when the answer stops
+   moving, so "is my pool big enough?" is answered from data instead of
+   guessed. Reports rate stability and ordering stability separately.
+7. **`rank`** — optional Bradley-Terry ranking of candidates against each
+   other, with a per-judge effect. Relative, population-dependent, and
+   explicitly not an acceptance gate; see
+   [Ranking candidates against each other](#ranking-candidates-against-each-other).
+8. **`report`** — the correlation diagnostic. Given any set of artifacts
    scored on multiple dimensions (CSV or JSONL of
    `{artifact_id, dimension, score}`), outputs a correlation matrix and
    flags pairs above a threshold (default 0.85) as redundant. Works on
    externally-produced score data, not just Hibiscus's own.
+
+## How a pair is scored
+
+`compare` judges each candidate-reference pair twice, once in each order.
+Those are two measurements of one comparison, not two comparisons, so
+they resolve to a single outcome before anything is counted:
+
+| candidate-first says | reference-first says | outcome |
+|---|---|---|
+| candidate | candidate | **win** |
+| reference | reference | **loss** |
+| they disagree | | **tie** (order-disagreement) |
+| either says TIE | | **tie** (judge) |
+
+Ties are excluded from the win-rate denominator — symmetrically, so they
+bias nothing — and reported separately as a tie rate.
+
+This matters more than it sounds. Counting each order as an independent
+trial does two bad things: it doubles `n`, making every confidence
+interval far narrower than the evidence supports; and it records an
+order-dependent verdict as one win *plus* one loss, dragging the
+candidate toward an exact coin flip. A judge with pure position bias —
+one that always picks whichever text is shown first — would score a
+confident-looking 50% on every candidate. That is score compression
+manufactured by the scoring layer, the exact failure this library exists
+to detect. Resolved properly, that judge produces a 100% tie rate and no
+win rate at all, which is the truthful answer.
+
+Two consequences worth knowing:
+
+- **A candidate can have no score.** If every pair ties, there is no win
+  rate; `has_signal` is False and the CLI says *no discriminating
+  comparisons* rather than printing a 0%.
+- **Judge ties and disagreement ties are counted separately.** "These are
+  equivalent" and "this judge can't tell" are different findings, even
+  though both leave the denominator.
+
+Comparison files written before this change are still readable. They are
+re-scored with the corrected logic and the CLI prints a note saying so,
+because the numbers will differ from anything previously reported for the
+same file.
 
 ## Checking that the answer actually worked
 
@@ -173,8 +231,8 @@ observed spread against the spread you'd get from sampling noise alone
 if every candidate had the same true win rate:
 
 ```
-c0:overall: 50.0% win rate [18.8%, 81.2%] (3/6)
-c1:overall: 50.0% win rate [18.8%, 81.2%] (3/6)
+c0:overall: 50.0% win rate [18.8%, 81.2%] (3/6 decisive pairs, 0 ties)
+c1:overall: 50.0% win rate [18.8%, 81.2%] (3/6 decisive pairs, 0 ties)
 ...
 spread across 6 candidates: 50.0%–50.0% (sd 0.000, 0.00x sampling noise)
 warning: win rates are not clearly separated from what pure sampling noise
@@ -218,6 +276,53 @@ Run it before trusting a new judge model, a new prompt, or a freshly
 built pool — it is the cheapest evidence you can get that the pipeline
 measures what you think it does.
 
+**Saturation.** "How many references do I need?" is answerable
+empirically rather than by guessing, which is what lets Hibiscus be
+dropped into a new project: rate until saturation says stop.
+
+```bash
+hibiscus saturate --pool pools/my-pool.jsonl --candidates probes.jsonl \
+  --seed 42 --cache cache/judge_cache.jsonl
+```
+
+It scores the same probe candidates against reference subsets of growing
+size, several seeded subsets per size, and reports how much the answer
+still moves:
+
+```
+ size   mean move   ordering tau   within-size sd
+    5           —              —            0.067
+   10       0.017          1.000            0.017
+   15       0.039          1.000            0.000
+   18       0.022          1.000            0.000
+
+ordering settled at 10 references (tau >= 0.9 for two consecutive sizes)
+win rates settled at 10 references (mean move <= 0.05 for two consecutive sizes)
+```
+
+Ordering stability (Kendall tau-b) and absolute-rate stability are
+reported separately, because ordering usually settles first and is often
+what you actually need. Pass `--cache`; subsets overlap heavily, so most
+of the work becomes cache hits.
+
+Like the others, this is bounded in what it claims: it shows the
+*measurement* has stopped moving, not that the pool captures your taste.
+A pool can saturate around a consistently wrong answer. `calibrate` is
+the check for that.
+
+**Length bias.** After position, length is the best-documented pairwise
+judge bias — judges over-prefer longer texts on tasks that don't penalize
+verbosity. `score` reports the correlation between candidate length and
+win rate next to the other diagnostics:
+
+```
+length-vs-win-rate correlation: +1.00
+warning: |r| >= 0.4 — the judge may be rewarding length rather than quality.
+```
+
+Reported, never corrected for. Whether length is legitimately part of
+quality depends on what you're judging, and that call is yours.
+
 ## Judge interface
 
 Judges are pluggable via `hibiscus.judge.base.JudgeAdapter`:
@@ -225,7 +330,7 @@ Judges are pluggable via `hibiscus.judge.base.JudgeAdapter`:
 ```python
 class JudgeAdapter(ABC):
     def compare(self, text_a: str, text_b: str, question: str) -> JudgeVerdict:
-        ...
+        ...  # JudgeVerdict(winner="a" | "b" | "tie", raw_response=...)
 ```
 
 The judge receives **only** `text_a`, `text_b`, and `question` — never an
@@ -242,16 +347,58 @@ Two adapters ship in the box:
   Requires `pip install hibiscus[anthropic]` and `ANTHROPIC_API_KEY`
   (or pass `api_key=`).
 
+A verdict may be `"a"`, `"b"`, or `"tie"`. Ties exist so that genuinely
+indistinguishable pairs aren't coin-flipped into the win rate as noise;
+they leave the denominator instead. The default prompt permits a tie
+without inviting one, because judges markedly over-use ties when offered
+them as an equal third option.
+
 The default comparison question is deliberately short:
 
-> Below are two texts, A and B. Which one is better? Answer with only the
-> single letter A or B.
+> Below are two texts, A and B. Which one is better? Answer with only A
+> or B. Answer TIE only if you genuinely cannot tell them apart.
 
 A long rubric in the prompt measurably hurt judgment quality in the project
 this library is based on — a 400-line API reference in a system prompt
 made a model hallucinate, while a short, opinionated allowlist outperformed
 the full spec. Override the question per-call (`--question` / `question=`)
 if you need to steer it, but keep it short.
+
+### Why not Elo?
+
+Elo (and its descendants) is the obvious way to turn pairwise outcomes
+into ratings, and Hibiscus deliberately doesn't use it as the headline
+number. The reason is the anchor.
+
+**Elo has no fixed origin.** A rating is meaningful only relative to the
+pool of players it was earned against, and it drifts as that pool
+changes. Ported to generated artifacts, a candidate's score would depend
+on what else happened to be generated the same week, and this month's
+numbers would not be comparable with last month's. Rating inflation in
+chess is the same phenomenon: the number moved because the population
+did.
+
+**Hibiscus trades that away for a fixed anchor.** The love-tier pool does
+not play and does not update. It is a frozen ruler. "Won 63% of
+comparisons against the pool" means the same thing in March as in
+September, which is exactly what you need for an acceptance gate —
+*ship it if it clears 60%* is a sentence you can write about a win rate
+and cannot write about an Elo score. Freezing the reference set costs you
+the ability to track a moving population; that is the trade, made on
+purpose.
+
+**Rating and ranking are different questions.** Elo estimates strength
+among peers. Hibiscus measures distance from curated taste. The pool
+encodes one person's judgment about what is good, not a population
+average, and it is supposed to — see the jury framing at the top.
+
+That said, the paired-comparison literature is where most of this comes
+from, and Hibiscus borrows two things from it. Bradley-Terry is available
+for the cases where you genuinely do want relative ranking (see
+[Ranking candidates against each other](#ranking-candidates-against-each-other)),
+carrying the same drift caveat. And the idea of matching opponents near a
+candidate's own level is why references are sampled from a chosen tier
+rather than the whole pool.
 
 ### Why pairwise, and not listwise
 
@@ -279,6 +426,44 @@ thing to reach for, so it's worth saying why this library doesn't:
 
 The cost lever is `k` (and the cache, and the choice of judge model), none
 of which change the adapter interface.
+
+## Ranking candidates against each other
+
+Everything above measures distance from the frozen pool. If you instead
+want to rank a batch *against itself*, there is an optional
+Bradley-Terry mode:
+
+```bash
+hibiscus rank --candidates candidates.jsonl --judge anthropic
+```
+
+```
+Bradley-Terry over 6 decisive comparisons among 4 candidates (converged)
+
+    1. lighthouse-draft         +1.842
+    2. kettle-draft             +0.503
+    3. mailbox-draft            -0.677
+    4. filler-draft             -1.668
+```
+
+It round-robins the candidates, resolves pairs exactly as `score` does
+(ties excluded), and fits strengths by penalized maximum likelihood. The
+model carries a **per-judge effect**, so a harsh judge and a lenient one
+can be placed on the same scale — which matters the moment you run more
+than one judge model:
+
+```
+judge effects (positive = more lenient toward the candidate side):
+  claude-sonnet-5              +0.412
+  some-other-model             -0.388
+```
+
+**These strengths are relative and population-dependent.** They shift
+when the batch changes, they are not comparable across runs, and they
+have precisely the drift property the pool anchor was designed to avoid.
+So: do not use them as an acceptance threshold, and do not average them
+together with a pool-anchored win rate — they are not the same kind of
+number. `score` remains the default and the recommended path.
 
 ## Determinism and reproducibility
 
@@ -315,11 +500,17 @@ pip install -e .
 python examples/worked_example.py
 ```
 
-Builds a five-item love-tier pool, compares a strong and a weak candidate
-against it with `MockJudge`, prints win rates with Wilson intervals and the
-order-disagreement rate, then runs the correlation diagnostic on synthetic
-dimension scores that include a deliberately duplicated signal — the same
-kind of redundancy that motivated this library.
+Builds a five-item love-tier pool, compares two candidates against it with
+`MockJudge`, prints win rates with Wilson intervals over decisive pairs,
+calibrates the judge against the pool's own tiers, shows the spread check
+catching a set where nothing separates, and runs the correlation
+diagnostic on synthetic dimension scores containing a deliberately
+duplicated signal — the same kind of redundancy that motivated this
+library.
+
+Calibration **fails** in that run, deliberately: `MockJudge` decides by
+hashing text, so it has no taste to reproduce and the check says so. That
+is the diagnostic working, not a broken demo.
 
 ## License
 

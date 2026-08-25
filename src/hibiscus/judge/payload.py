@@ -16,7 +16,7 @@ ALLOWED_PAYLOAD_KEYS = frozenset({"text_a", "text_b", "question"})
 
 DEFAULT_QUESTION = (
     "Below are two texts, A and B. Which one is better? "
-    "Answer with only the single letter A or B."
+    "Answer with only A or B. Answer TIE only if you genuinely cannot tell them apart."
 )
 
 

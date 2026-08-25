@@ -63,3 +63,51 @@ def test_run_comparisons_never_leaks_ids_tiers_or_metadata(tmp_path):
         assert "love" not in blob
         assert "internal-only" not in blob
         assert "alice" not in blob
+
+
+def test_default_question_permits_a_tie_without_pushing_for_one():
+    from hibiscus.judge.payload import DEFAULT_QUESTION
+
+    lowered = DEFAULT_QUESTION.lower()
+    assert "tie" in lowered
+    # Framed as a last resort, not an equal third option.
+    assert "only if" in lowered
+
+
+def test_mock_judge_can_produce_ties():
+    from hibiscus.judge.mock import MockJudge
+
+    always = MockJudge(tie_rate=1.0)
+    never = MockJudge(tie_rate=0.0)
+
+    assert always.compare("a", "b", "q").winner == "tie"
+    assert never.compare("a", "b", "q").winner in {"a", "b"}
+
+
+def test_mock_judge_ties_survive_a_position_swap():
+    from hibiscus.judge.mock import MockJudge
+
+    judge = MockJudge(tie_rate=0.5)
+    for i in range(40):
+        a, b = f"text-{i}", f"other-{i}"
+        forward = judge.compare(a, b, "q").winner
+        backward = judge.compare(b, a, "q").winner
+        assert (forward == "tie") == (backward == "tie")
+
+
+def test_mock_judge_rejects_an_out_of_range_tie_rate():
+    import pytest
+
+    from hibiscus.judge.mock import MockJudge
+
+    with pytest.raises(ValueError):
+        MockJudge(tie_rate=1.5)
+
+
+def test_anthropic_adapter_parses_tie():
+    from hibiscus.judge.anthropic_adapter import _parse_winner
+
+    assert _parse_winner("TIE") == "tie"
+    assert _parse_winner(" tie ") == "tie"
+    assert _parse_winner("A") == "a"
+    assert _parse_winner("B") == "b"

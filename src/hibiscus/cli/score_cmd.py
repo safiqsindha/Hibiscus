@@ -6,7 +6,18 @@ import json
 import sys
 
 from ..compare import load_comparisons
-from ..score import score_all, score_candidate, score_spread
+from ..pairs import count_legacy_records, resolve_pairs, summarize_pairs
+from ..score import length_bias, score_all, score_candidate, score_spread
+
+
+def _filtered(records, args):
+    """Apply the same candidate/dimension filters used for the score rows."""
+    return [
+        r
+        for r in records
+        if (not args.candidate or r.candidate_id == args.candidate)
+        and (not args.dimension or r.dimension == args.dimension)
+    ]
 
 
 def register(subparsers) -> None:
@@ -33,21 +44,67 @@ def _handle(args) -> int:
         key: {
             "wins": r.wins,
             "n": r.n,
-            "win_rate": round(r.point_estimate, 4),
-            "wilson_lower": round(r.lower, 4),
-            "wilson_upper": round(r.upper, 4),
+            "win_rate": round(r.point_estimate, 4) if r.has_signal else None,
+            "wilson_lower": round(r.lower, 4) if r.has_signal else None,
+            "wilson_upper": round(r.upper, 4) if r.has_signal else None,
+            **(r.summary.to_dict() if r.summary else {}),
         }
         for key, r in rows.items()
     }
 
-    for key, stats in output.items():
+    for key, r in rows.items():
+        summary = r.summary
+        ties = f", {summary.ties} tie" + ("s" if summary.ties != 1 else "") if summary else ""
+        if not r.has_signal:
+            print(f"{key}: no discriminating comparisons — every pair tied")
+            if summary:
+                print(
+                    f"    ({summary.ties} tied pairs: {summary.judge_ties} judge, "
+                    f"{summary.disagreement_ties} order-disagreement)"
+                )
+            continue
         print(
-            f"{key}: {stats['win_rate']:.1%} win rate "
-            f"[{stats['wilson_lower']:.1%}, {stats['wilson_upper']:.1%}] "
-            f"({stats['wins']}/{stats['n']})"
+            f"{key}: {r.point_estimate:.1%} win rate "
+            f"[{r.lower:.1%}, {r.upper:.1%}] "
+            f"({r.wins}/{r.n} decisive pairs{ties})"
         )
 
     payload: dict = {"scores": output}
+
+    all_pairs = resolve_pairs(_filtered(records, args))
+    overall = summarize_pairs(all_pairs, legacy_records=count_legacy_records(records))
+    payload["pairs"] = overall.to_dict()
+    if overall.total:
+        print(
+            f"\ntie rate: {overall.tie_rate:.1%} of {overall.total} pairs "
+            f"({overall.judge_ties} judge, {overall.disagreement_ties} order-disagreement)"
+        )
+    if overall.uncounterbalanced:
+        print(
+            f"warning: {overall.uncounterbalanced} pair(s) had only one order and could not "
+            "be position-controlled",
+            file=sys.stderr,
+        )
+    if overall.legacy_records:
+        print(
+            f"note: {overall.legacy_records} record(s) predate the pair-resolution fix. They "
+            "have been re-scored with the corrected logic, so these numbers will differ from "
+            "any previously reported for the same file — the older numbers double-counted "
+            "each pair.",
+            file=sys.stderr,
+        )
+
+    bias = length_bias(records, dimension=args.dimension)
+    payload["length_bias"] = bias.to_dict()
+    if bias.correlation is not None:
+        print(f"length-vs-win-rate correlation: {bias.correlation:+.2f}")
+        if bias.flagged:
+            print(
+                f"warning: |r| >= {bias.threshold} — the judge may be rewarding length "
+                "rather than quality. Diagnostic only; whether that is wrong depends on "
+                "your artifacts.",
+                file=sys.stderr,
+            )
 
     spread = score_spread(records, dimension=args.dimension)
     if spread.n_candidates > 1:

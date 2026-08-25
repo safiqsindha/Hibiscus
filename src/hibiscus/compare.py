@@ -18,7 +18,14 @@ from .rng import sample_deterministic
 from .tiers import Tier, parse_tier
 
 Order = Literal["candidate_first", "reference_first"]
-Winner = Literal["candidate", "reference"]
+Winner = Literal["candidate", "reference", "tie"]
+
+#: Bumped when the meaning of a stored record changes. Version 1 records
+#: were written before ties existed and before scoring resolved the two
+#: orders of a pair into a single outcome; they are still readable, but
+#: rescoring them produces different (correct) numbers, so they are
+#: flagged rather than silently mixed in.
+SCHEMA_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -35,6 +42,8 @@ class ComparisonRecord:
     timestamp: str
     cache_hit: bool
     dimension: str = "overall"
+    candidate_length: "int | None" = None
+    schema_version: int = SCHEMA_VERSION
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -48,10 +57,21 @@ class ComparisonRecord:
             "timestamp": self.timestamp,
             "cache_hit": self.cache_hit,
             "dimension": self.dimension,
+            "candidate_length": self.candidate_length,
+            "schema_version": self.schema_version,
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ComparisonRecord":
+        # Records written before versioning carry no marker; treat them as v1.
+        data = {**data}
+        data.setdefault("schema_version", 1)
+        version = data["schema_version"]
+        if version > SCHEMA_VERSION:
+            raise ValueError(
+                f"comparison record has schema_version {version}, but this build of "
+                f"Hibiscus understands at most {SCHEMA_VERSION}; upgrade Hibiscus to read it"
+            )
         return cls(**data)
 
 
@@ -131,8 +151,10 @@ def run_comparisons(
                 if cache is not None:
                     cache.put(cache_key, verdict)
 
-            if order == "candidate_first":
-                winner: Winner = "candidate" if verdict.winner == "a" else "reference"
+            if verdict.winner == "tie":
+                winner: Winner = "tie"
+            elif order == "candidate_first":
+                winner = "candidate" if verdict.winner == "a" else "reference"
             else:
                 winner = "reference" if verdict.winner == "a" else "candidate"
 
@@ -148,6 +170,7 @@ def run_comparisons(
                     timestamp=stamp(),
                     cache_hit=cache_hit,
                     dimension=dimension,
+                    candidate_length=len(candidate.text),
                 )
             )
     return records

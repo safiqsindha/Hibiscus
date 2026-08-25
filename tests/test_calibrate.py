@@ -8,12 +8,15 @@ from hibiscus.judge.base import JudgeAdapter, JudgeVerdict
 from hibiscus.tiers import TIER_ORDER
 
 # Longer text == better, so a pool whose love items are long and nope
-# items short gives a judge that agrees with the tiers.
-GOOD_TIER_TEXTS = {
-    Tier.LOVE: "a long and considered reference full of specific detail",
-    Tier.OKAY: "a middling reference, some detail",
-    Tier.NOPE: "short",
-}
+# items short gives a judge that agrees with the tiers. Lengths vary
+# *within* each tier too: equal-length items would make every same-tier
+# comparison flip under position swap and resolve to a tie, leaving the
+# tier with no signal at all.
+TIER_BASE_LENGTH = {Tier.LOVE: 120, Tier.OKAY: 60, Tier.NOPE: 10}
+
+
+def _text(tier: Tier, i: int) -> str:
+    return f"{tier.value}-{i} " + "x" * (TIER_BASE_LENGTH[tier] + i * 7)
 
 
 class LengthJudge(JudgeAdapter):
@@ -39,9 +42,9 @@ class InvertedJudge(JudgeAdapter):
 
 def _tiered_pool(tmp_path, *, per_tier=3):
     pool = Pool(tmp_path / "pool.jsonl")
-    for tier, text in GOOD_TIER_TEXTS.items():
+    for tier in (Tier.LOVE, Tier.OKAY, Tier.NOPE):
         for i in range(per_tier):
-            pool.add(RatedArtifact(id=f"{tier.value}-{i}", text=f"{text} {i}", tier=tier))
+            pool.add(RatedArtifact(id=f"{tier.value}-{i}", text=_text(tier, i), tier=tier))
     return pool
 
 
@@ -131,8 +134,8 @@ def test_reference_tier_needs_room_to_exclude_the_candidate(tmp_path):
 def test_missing_tiers_are_skipped_not_fatal(tmp_path):
     pool = Pool(tmp_path / "pool.jsonl")
     for i in range(3):
-        pool.add(RatedArtifact(id=f"love-{i}", text=f"a long reference {i}", tier=Tier.LOVE))
-        pool.add(RatedArtifact(id=f"nope-{i}", text=f"s{i}", tier=Tier.NOPE))
+        pool.add(RatedArtifact(id=f"love-{i}", text=_text(Tier.LOVE, i), tier=Tier.LOVE))
+        pool.add(RatedArtifact(id=f"nope-{i}", text=_text(Tier.NOPE, i), tier=Tier.NOPE))
 
     report = run_calibration(pool, LengthJudge(), k=2, seed=1, model="test")
 
