@@ -59,8 +59,9 @@ you use the Anthropic adapter.
 ## Quickstart (CLI)
 
 ```bash
-# 1. Rate a batch of candidates into love/okay/nope. Single keystroke per
-#    item, resumable — quitting and rerunning skips anything already rated.
+# 1. Rate a batch of candidates into love/okay/nope. One keystroke per item
+#    (SHIFT+key to add a note), resumable — quitting and rerunning skips
+#    anything already rated.
 hibiscus rate --artifacts candidates.jsonl --pool pools/my-pool.jsonl
 
 # 2. Compare new candidates against the love tier (k=2 references, both
@@ -120,9 +121,11 @@ print(score_candidate(records, candidate_id="cand-1"))  # WinRateResult
 
 ## Components
 
-1. **`rate`** — human rating CLI. One artifact at a time, single keystroke
-   for love/okay/nope, optional free-text note, resumable, never
-   re-presents an already-rated item.
+1. **`rate`** — human rating CLI. One artifact at a time; `l`/`o`/`n`
+   records the rating and advances immediately — no Enter, no
+   confirmation. Shift the key (`L`/`O`/`N`) to attach a free-text note
+   to that rating. Resumable, and never re-presents an already-rated
+   item.
 2. **`pool`** — storage and query. Add, list, filter by tier, export/import
    JSONL. Explicit UTF-8 on every read and write, always.
 3. **`compare`** — samples K references from a chosen tier (default:
@@ -174,6 +177,33 @@ this library is based on — a 400-line API reference in a system prompt
 made a model hallucinate, while a short, opinionated allowlist outperformed
 the full spec. Override the question per-call (`--question` / `question=`)
 if you need to steer it, but keep it short.
+
+### Why pairwise, and not listwise
+
+Each judge call sees exactly two texts: the candidate and one reference.
+Sampling `k=2` references means four calls per candidate (two references ×
+two orders), not one call showing the judge everything at once. Bundling
+all the references into a single call is cheaper, and it is the obvious
+thing to reach for, so it's worth saying why this library doesn't:
+
+- **Position control stays exact.** "Run it in both orders" is well-defined
+  for two texts. Three texts have six orderings, so you'd have to sample or
+  rotate, and the order-disagreement rate — a headline reliability signal
+  here — would stop being a clean flip rate.
+- **The Wilson interval stays honest.** It assumes independent Bernoulli
+  trials, which is precisely what one-vs-one comparisons produce. A single
+  call ranking N+1 texts is multinomial; collapsing it to won/lost both
+  discards information and quietly breaks the independence assumption.
+- **The cache stays useful.** Keys are per (candidate, reference) pair, so
+  resampling references reuses whatever overlaps. Keyed on a whole bundle,
+  swapping one reference would invalidate the entire call.
+- **The prompt stays short**, for the reason described just above — and
+  "which of these two is better" is the simplest possible relative
+  question, which is the whole reason for preferring comparison over
+  absolute scoring in the first place.
+
+The cost lever is `k` (and the cache, and the choice of judge model), none
+of which change the adapter interface.
 
 ## Determinism and reproducibility
 

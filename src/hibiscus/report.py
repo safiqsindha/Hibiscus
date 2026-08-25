@@ -71,10 +71,14 @@ def pearson(xs: list[float], ys: list[float]) -> float:
 
 @dataclass(frozen=True)
 class CorrelationReport:
-    """A dimension x dimension correlation matrix plus flagged redundant pairs."""
+    """A dimension x dimension correlation matrix plus flagged redundant pairs.
+
+    A matrix entry is ``None`` when that dimension pair shares fewer than
+    two artifacts, so a correlation could not be computed for it.
+    """
 
     dimensions: list[str]
-    matrix: dict[str, dict[str, float]]
+    matrix: dict[str, dict[str, "float | None"]]
     redundant_pairs: list[tuple[str, str, float]]
 
     def to_dict(self) -> dict[str, Any]:
@@ -91,33 +95,42 @@ class CorrelationReport:
 def build_correlation_report(rows: list[ScoreRow], *, threshold: float = 0.85) -> CorrelationReport:
     """Build a correlation matrix across dimensions and flag pairs >= threshold.
 
-    Only artifacts scored on every dimension present are used, so the
-    matrix compares like with like.
+    Each pair is correlated over the artifacts scored on *both* of its
+    dimensions, rather than only over artifacts scored on every dimension
+    in the set. Real rubric history is usually ragged — one dimension
+    added late, a handful of artifacts never scored on it — and
+    intersecting across all dimensions at once would silently discard
+    most of it, or all of it if any two dimensions never overlap.
     """
     by_dimension: dict[str, dict[str, float]] = defaultdict(dict)
     for row in rows:
         by_dimension[row.dimension][row.artifact_id] = row.score
 
     dimensions = sorted(by_dimension)
-    shared_artifacts = (
-        set.intersection(*(set(d) for d in by_dimension.values())) if dimensions else set()
-    )
-    if len(shared_artifacts) < 2:
-        raise ValueError(
-            "need at least two artifacts scored on every dimension to compute correlations"
-        )
-    ordered_artifacts = sorted(shared_artifacts)
 
-    matrix: dict[str, dict[str, float]] = {}
+    matrix: dict[str, dict[str, "float | None"]] = {}
     redundant: list[tuple[str, str, float]] = []
+    computed_any = False
     for i, dim_a in enumerate(dimensions):
         matrix[dim_a] = {}
-        xs = [by_dimension[dim_a][a] for a in ordered_artifacts]
         for j, dim_b in enumerate(dimensions):
-            ys = [by_dimension[dim_b][a] for a in ordered_artifacts]
-            corr = pearson(xs, ys)
+            shared = sorted(set(by_dimension[dim_a]) & set(by_dimension[dim_b]))
+            if len(shared) < 2:
+                matrix[dim_a][dim_b] = None
+                continue
+            corr = pearson(
+                [by_dimension[dim_a][a] for a in shared],
+                [by_dimension[dim_b][a] for a in shared],
+            )
             matrix[dim_a][dim_b] = corr
+            computed_any = True
             if i < j and corr >= threshold:
                 redundant.append((dim_a, dim_b, corr))
+
+    if not computed_any:
+        raise ValueError(
+            "no dimension pair shares at least two scored artifacts; "
+            "cannot compute any correlation"
+        )
 
     return CorrelationReport(dimensions=dimensions, matrix=matrix, redundant_pairs=redundant)

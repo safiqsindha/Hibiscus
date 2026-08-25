@@ -1,10 +1,14 @@
 """The ``hibiscus rate`` command: fast, resumable human rating.
 
 Presents one artifact at a time, accepts a single keystroke for
-love/okay/nope (plus skip/quit), an optional free-text note, and never
-re-presents an artifact that's already in the pool. Optimized for
-getting a human through hundreds of items in an hour: no confirmation
-prompts, no re-typing.
+love/okay/nope (plus skip/quit), and never re-presents an artifact
+that's already in the pool. Optimized for getting a human through
+hundreds of items in an hour: one keystroke rates an item and advances
+immediately — no Enter, no confirmation prompt.
+
+Notes are opt-in, because prompting for one on every item would double
+the keystrokes in the common case. Shift the rating key (``L``/``O``/``N``)
+to rate *and* be asked for a note; the lowercase key rates silently.
 """
 
 from __future__ import annotations
@@ -23,7 +27,7 @@ KEY_TO_TIER = {"l": Tier.LOVE, "o": Tier.OKAY, "n": Tier.NOPE}
 QUIT_KEYS = {"q"}
 SKIP_KEYS = {"s"}
 
-PROMPT = "(l)ove  (o)kay  (n)ope  (s)kip  (q)uit > "
+PROMPT = "(l)ove  (o)kay  (n)ope  (s)kip  (q)uit  [SHIFT+rating to add a note] > "
 
 
 def load_artifacts(path: "str | Path") -> list[Artifact]:
@@ -44,6 +48,8 @@ def default_reader() -> Callable[[], str]:
     Falls back to line-buffered reads when stdin isn't a real terminal
     (piped input, non-interactive shells) so the session still works
     there — just without single-keystroke speed.
+
+    Case is preserved: a shifted rating key is what asks for a note.
     """
     if not sys.stdin.isatty():
 
@@ -51,7 +57,7 @@ def default_reader() -> Callable[[], str]:
             line = sys.stdin.readline()
             if not line:
                 return "q"
-            return line.strip()[:1].lower() or "\n"
+            return line.strip()[:1] or "\n"
 
         return _line_reader
 
@@ -66,7 +72,11 @@ def default_reader() -> Callable[[], str]:
             ch = sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old)
-        return ch.lower()
+        # Raw mode swallows the usual signal handling, so translate the
+        # interrupt byte into the same clean exit as pressing "q".
+        if ch == "\x03":
+            return "q"
+        return ch
 
     return _tty_reader
 
@@ -82,15 +92,25 @@ def run_rate_session(
 ) -> None:
     """Run one rating session over ``artifacts``, appending ratings to ``pool``.
 
-    Already-rated ids are skipped up front, so calling this again with
-    the same (or a superset) artifact list resumes cleanly and never
-    re-presents a rated item. ``read_key``/``read_note`` are injectable
-    for testing without a real terminal.
+    Already-rated ids are skipped up front, and repeated ids within one
+    artifact list are collapsed, so calling this again with the same (or
+    a superset) artifact list resumes cleanly and never re-presents a
+    rated item. ``read_key``/``read_note`` are injectable for testing
+    without a real terminal.
+
+    A lowercase rating key records the rating and moves on immediately.
+    An uppercase one records it and asks for a note first.
     """
     read_note = read_note or (lambda: input("note (Enter to skip): "))
     stamp = now or (lambda: datetime.now(timezone.utc).isoformat())
 
-    pending = [a for a in artifacts if a.id not in pool]
+    pending: list[Artifact] = []
+    queued: set[str] = set()
+    for artifact in artifacts:
+        if artifact.id in pool or artifact.id in queued:
+            continue
+        queued.add(artifact.id)
+        pending.append(artifact)
     total = len(pending)
     for i, artifact in enumerate(pending, start=1):
         out.write(f"\n[{i}/{total}] {artifact.id}\n")
@@ -100,19 +120,21 @@ def run_rate_session(
 
         while True:
             key = read_key()
-            if key in QUIT_KEYS:
+            folded = key.lower()
+            if folded in QUIT_KEYS:
                 out.write("\nstopped — resume anytime, already-rated items won't reappear\n")
                 return
-            if key in SKIP_KEYS:
+            if folded in SKIP_KEYS:
                 out.write("\nskipped\n")
                 break
-            if key in KEY_TO_TIER:
-                tier = KEY_TO_TIER[key]
-                try:
-                    note_raw = read_note()
-                except EOFError:
-                    note_raw = ""
-                note = note_raw.strip() or None
+            if folded in KEY_TO_TIER:
+                tier = KEY_TO_TIER[folded]
+                note = None
+                if key.isupper():
+                    try:
+                        note = read_note().strip() or None
+                    except EOFError:
+                        note = None
                 pool.add(
                     RatedArtifact(
                         id=artifact.id,
