@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import compare_cmd, pool_cmd, rate, report_cmd, score_cmd
+from . import calibrate_cmd, compare_cmd, pool_cmd, rate, report_cmd, score_cmd
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -18,6 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
     pool_cmd.register(subparsers)
     compare_cmd.register(subparsers)
     score_cmd.register(subparsers)
+    calibrate_cmd.register(subparsers)
     report_cmd.register(subparsers)
     return parser
 

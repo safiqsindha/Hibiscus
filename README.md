@@ -74,8 +74,13 @@ hibiscus compare \
   --cache cache/judge_cache.jsonl \
   --out comparisons.jsonl
 
-# 3. Turn comparisons into win rates with confidence intervals.
+# 3. Turn comparisons into win rates with confidence intervals (and a
+#    warning if the candidates aren't actually separating).
 hibiscus score --comparisons comparisons.jsonl --out scores.json
+
+# 3b. Sanity-check the judge against tiers you already rated. Exits
+#     non-zero if your own okay/nope items don't rank below love.
+hibiscus calibrate --pool pools/my-pool.jsonl --seed 42 --judge anthropic
 
 # 4. Run the correlation diagnostic on any {artifact_id, dimension, score}
 #    data — Hibiscus's own or an existing rubric's history.
@@ -136,12 +141,82 @@ print(score_candidate(records, candidate_id="cand-1"))  # WinRateResult
 4. **`score`** — aggregates comparisons into a win rate with a Wilson score
    confidence interval. Supports per-dimension scoring when comparisons
    carry a `dimension`, but a single overall judgment is the default and
-   the recommended path.
-5. **`report`** — the correlation diagnostic. Given any set of artifacts
+   the recommended path. Scoring more than one candidate also reports the
+   **spread** across the set, and warns when it isn't distinguishable
+   from sampling noise (see below).
+5. **`calibrate`** — the validity check. Scores your own `okay` and
+   `nope` items as if they were candidates against the `love` pool. You
+   already know how they should rank, so if they don't, the judge or the
+   pool is wrong and no score from this pipeline means what it appears
+   to. Uses only rating data you already have, never compares a pool
+   item against itself, and exits non-zero on failure so it can gate a
+   run.
+6. **`report`** — the correlation diagnostic. Given any set of artifacts
    scored on multiple dimensions (CSV or JSONL of
    `{artifact_id, dimension, score}`), outputs a correlation matrix and
    flags pairs above a threshold (default 0.85) as redundant. Works on
    externally-produced score data, not just Hibiscus's own.
+
+## Checking that the answer actually worked
+
+Switching to pairwise comparison is supposed to fix two things: scores
+that collapse into a narrow band, and dimensions that secretly measure
+the same thing. The correlation report catches the second. Two more
+pieces catch the first, and catch the case where the whole setup is
+quietly broken.
+
+**Spread.** The original failure was *scores compressed near zero, every
+output looking identical*. Per-candidate win rates won't show you that —
+each one looks like a perfectly respectable number. So `score` also
+reports the distribution across the candidate set, and compares the
+observed spread against the spread you'd get from sampling noise alone
+if every candidate had the same true win rate:
+
+```
+c0:overall: 50.0% win rate [18.8%, 81.2%] (3/6)
+c1:overall: 50.0% win rate [18.8%, 81.2%] (3/6)
+...
+spread across 6 candidates: 50.0%–50.0% (sd 0.000, 0.00x sampling noise)
+warning: win rates are not clearly separated from what pure sampling noise
+would produce — the judge may not be discriminating between these candidates.
+```
+
+A ratio near 1.0 means the differences between your candidates are
+indistinguishable from coin flips, however confident the individual
+intervals look. This is the compression failure, reported rather than
+hidden.
+
+**Calibration.** A win rate against the love pool only means something
+if the judge agrees with the taste that built that pool — and the pool
+is curated taste, not ground truth. You can check this without labeling
+anything new, because you already rated items you *know* are worse:
+
+```bash
+hibiscus calibrate --pool pools/my-pool.jsonl --seed 42 \
+  --judge anthropic --model claude-sonnet-5
+```
+
+It scores your `okay` and `nope` items as candidates against the `love`
+pool (never comparing a pool item against itself) and checks that the
+result reproduces the ordering you assigned by hand:
+
+```
+   love:  62.5% [41.0%, 80.0%]  25 items, 100 comparisons
+   okay:  28.0% [19.9%, 37.9%]  25 items, 100 comparisons
+   nope:   6.0% [ 2.8%, 12.5%]  25 items, 100 comparisons
+
+PASS — win rates follow your hand-assigned tier ordering.
+```
+
+A lower tier outscoring a higher one is reported as an inversion, and so
+is the case where every tier lands on the same number. Ties *between the
+lower tiers* are tolerated: when every foil is drawn from the love tier,
+`okay` and `nope` can both legitimately floor near zero. The command
+exits non-zero on failure, so it can gate a scoring run in CI.
+
+Run it before trusting a new judge model, a new prompt, or a freshly
+built pool — it is the cheapest evidence you can get that the pipeline
+measures what you think it does.
 
 ## Judge interface
 

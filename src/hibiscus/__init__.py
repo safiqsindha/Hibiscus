@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from .artifact import Artifact
 from .cache import CacheKey, JudgeCache
+from .calibrate import CalibrationReport, TierCalibration, run_calibration
 from .compare import (
     ComparisonRecord,
     load_comparisons,
@@ -19,7 +20,14 @@ from .compare import (
 )
 from .pool import Pool, RatedArtifact
 from .report import CorrelationReport, ScoreRow, build_correlation_report, load_rows, pearson
-from .score import WinRateResult, score_all, score_candidate, wilson_interval
+from .score import (
+    SpreadResult,
+    WinRateResult,
+    score_all,
+    score_candidate,
+    score_spread,
+    wilson_interval,
+)
 from .tiers import Tier, parse_tier
 
 __version__ = "0.1.0"
@@ -43,6 +51,11 @@ __all__ = [
     "wilson_interval",
     "score_candidate",
     "score_all",
+    "SpreadResult",
+    "score_spread",
+    "CalibrationReport",
+    "TierCalibration",
+    "run_calibration",
     "ScoreRow",
     "CorrelationReport",
     "build_correlation_report",
