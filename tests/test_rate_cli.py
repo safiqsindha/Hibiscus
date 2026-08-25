@@ -89,23 +89,57 @@ def test_invalid_keystroke_reprompts(tmp_path):
     assert pool.get("a0").tier is Tier.LOVE
 
 
-def test_note_is_recorded(tmp_path):
+def test_uppercase_key_records_a_note(tmp_path):
     artifacts = [Artifact(id="a0", text="t0")]
     pool = Pool(tmp_path / "pool.jsonl")
 
     run_rate_session(
         artifacts,
         pool,
-        read_key=make_reader(["l"]),
+        read_key=make_reader(["L"]),
         read_note=lambda: "reminds me of early Ashbery",
         out=io.StringIO(),
     )
 
-    assert pool.get("a0").note == "reminds me of early Ashbery"
+    rated = pool.get("a0")
+    assert rated.tier is Tier.LOVE
+    assert rated.note == "reminds me of early Ashbery"
+
+
+def test_lowercase_key_never_prompts_for_a_note(tmp_path):
+    """The fast path must cost exactly one keystroke — no Enter, no prompt."""
+    artifacts = [Artifact(id="a0", text="t0"), Artifact(id="a1", text="t1")]
+    pool = Pool(tmp_path / "pool.jsonl")
+
+    def exploding_note():
+        raise AssertionError("lowercase rating must not ask for a note")
+
+    run_rate_session(
+        artifacts,
+        pool,
+        read_key=make_reader(["l", "n"]),
+        read_note=exploding_note,
+        out=io.StringIO(),
+    )
+
+    assert pool.get("a0").note is None
+    assert pool.get("a1").tier is Tier.NOPE
+
+
+def test_repeated_id_in_one_batch_is_presented_once(tmp_path):
+    """A duplicated id used to crash the session mid-run on the second add."""
+    artifacts = [Artifact(id="dup", text="t"), Artifact(id="dup", text="t")]
+    pool = Pool(tmp_path / "pool.jsonl")
+    out = io.StringIO()
+
+    run_rate_session(artifacts, pool, read_key=make_reader(["l"]), read_note=no_note, out=out)
+
+    assert len(pool) == 1
+    assert "[1/1]" in out.getvalue()
 
 
 def test_utf8_round_trip_through_rate_session(tmp_path):
-    text = "middot · en–dash em—dash “curly” non breaking café"
+    text = "middot · en–dash em—dash “curly” non breaking café"
     artifacts = [Artifact(id="u1", text=text)]
     pool_path = tmp_path / "pool.jsonl"
 
@@ -115,3 +149,4 @@ def test_utf8_round_trip_through_rate_session(tmp_path):
 
     reloaded = Pool(pool_path)
     assert reloaded.get("u1").text == text
+    assert " " in reloaded.get("u1").text

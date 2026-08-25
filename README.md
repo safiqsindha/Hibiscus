@@ -59,8 +59,9 @@ you use the Anthropic adapter.
 ## Quickstart (CLI)
 
 ```bash
-# 1. Rate a batch of candidates into love/okay/nope. Single keystroke per
-#    item, resumable — quitting and rerunning skips anything already rated.
+# 1. Rate a batch of candidates into love/okay/nope. One keystroke per item
+#    (SHIFT+key to add a note), resumable — quitting and rerunning skips
+#    anything already rated.
 hibiscus rate --artifacts candidates.jsonl --pool pools/my-pool.jsonl
 
 # 2. Compare new candidates against the love tier (k=2 references, both
@@ -120,9 +121,11 @@ print(score_candidate(records, candidate_id="cand-1"))  # WinRateResult
 
 ## Components
 
-1. **`rate`** — human rating CLI. One artifact at a time, single keystroke
-   for love/okay/nope, optional free-text note, resumable, never
-   re-presents an already-rated item.
+1. **`rate`** — human rating CLI. One artifact at a time; `l`/`o`/`n`
+   records the rating and advances immediately — no Enter, no
+   confirmation. Shift the key (`L`/`O`/`N`) to attach a free-text note
+   to that rating. Resumable, and never re-presents an already-rated
+   item.
 2. **`pool`** — storage and query. Add, list, filter by tier, export/import
    JSONL. Explicit UTF-8 on every read and write, always.
 3. **`compare`** — samples K references from a chosen tier (default:

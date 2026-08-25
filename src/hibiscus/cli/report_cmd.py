@@ -25,8 +25,11 @@ def _handle(args) -> int:
     print(f"dimensions: {', '.join(report.dimensions)}")
     print("\t".join([""] + report.dimensions))
     for dim_a in report.dimensions:
-        line = [dim_a] + [f"{report.matrix[dim_a][dim_b]:.2f}" for dim_b in report.dimensions]
-        print("\t".join(line))
+        cells = []
+        for dim_b in report.dimensions:
+            corr = report.matrix[dim_a][dim_b]
+            cells.append("n/a" if corr is None else f"{corr:.2f}")
+        print("\t".join([dim_a] + cells))
 
     if report.redundant_pairs:
         print(f"\nredundant pairs (>= {args.threshold}):")

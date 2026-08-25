@@ -44,6 +44,38 @@ def test_correlation_report_matrix_diagonal_is_one():
         assert report.matrix[dim][dim] == pytest.approx(1.0)
 
 
+def test_ragged_coverage_still_correlates_the_pairs_that_overlap():
+    """Real rubric history is ragged: a dimension added late shouldn't
+    discard every artifact that predates it."""
+    rows = []
+    for i, score in enumerate([0.9, 0.2, 0.5, 0.8, 0.1]):
+        rows.append(ScoreRow(f"a{i}", "novelty", score))
+        rows.append(ScoreRow(f"a{i}", "novelty_dup", score))
+    # "added_late" only covers the last two artifacts.
+    rows.append(ScoreRow("a3", "added_late", 0.4))
+    rows.append(ScoreRow("a4", "added_late", 0.7))
+
+    report = build_correlation_report(rows, threshold=0.85)
+
+    # The fully-overlapping duplicate pair is still detected...
+    assert ("novelty", "novelty_dup") in {(a, b) for a, b, _ in report.redundant_pairs}
+    # ...and the sparse dimension is correlated over its own overlap, not dropped.
+    assert report.matrix["added_late"]["novelty"] is not None
+
+
+def test_pair_with_insufficient_overlap_is_reported_as_none():
+    rows = [
+        ScoreRow("a1", "x", 0.1),
+        ScoreRow("a2", "x", 0.9),
+        ScoreRow("a3", "y", 0.4),
+        ScoreRow("a4", "y", 0.6),
+    ]
+    report = build_correlation_report(rows)
+    assert report.matrix["x"]["y"] is None
+    assert report.matrix["x"]["x"] == pytest.approx(1.0)
+    assert report.redundant_pairs == []
+
+
 def test_correlation_report_requires_shared_artifacts():
     rows = [ScoreRow("a1", "x", 0.5), ScoreRow("a1", "y", 0.5)]
     with pytest.raises(ValueError):
