@@ -1,0 +1,307 @@
+{
+  "win_rates": {
+    "truncated": {
+      "per_candidate": {
+        "src-00__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-03__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-07__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-11__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-15__truncated": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.0,
+      "n_candidates": 5
+    },
+    "shuffled": {
+      "per_candidate": {
+        "src-00__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-03__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-07__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-11__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-15__shuffled": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.0,
+      "n_candidates": 5
+    },
+    "padded": {
+      "per_candidate": {
+        "src-00__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-03__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-07__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-11__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-15__padded": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.0,
+      "n_candidates": 5
+    },
+    "stripped": {
+      "per_candidate": {
+        "src-00__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-03__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-07__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-11__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-15__stripped": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.0,
+      "n_candidates": 5
+    },
+    "intact": {
+      "per_candidate": {
+        "src-00__intact": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 1,
+          "n": 1,
+          "ties": 1
+        },
+        "src-03__intact": {
+          "has_signal": true,
+          "win_rate": 1.0,
+          "wins": 1,
+          "n": 1,
+          "ties": 1
+        },
+        "src-07__intact": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "src-11__intact": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 1,
+          "ties": 1
+        },
+        "src-15__intact": {
+          "has_signal": false,
+          "win_rate": null,
+          "wins": 0,
+          "n": 0,
+          "ties": 2
+        }
+      },
+      "mean_win_rate": 0.5,
+      "n_candidates": 4
+    },
+    "control": {
+      "per_candidate": {
+        "ctl-00": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "ctl-01": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "ctl-02": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "ctl-03": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        },
+        "ctl-04": {
+          "has_signal": true,
+          "win_rate": 0.0,
+          "wins": 0,
+          "n": 2,
+          "ties": 0
+        }
+      },
+      "mean_win_rate": 0.0,
+      "n_candidates": 5
+    }
+  },
+  "spread": {
+    "truncated": {
+      "n_candidates": 5,
+      "mean": 0.0,
+      "stdev": 0.0,
+      "minimum": 0.0,
+      "maximum": 0.0,
+      "dispersion_ratio": null,
+      "discriminating": false
+    },
+    "shuffled": {
+      "n_candidates": 5,
+      "mean": 0.0,
+      "stdev": 0.0,
+      "minimum": 0.0,
+      "maximum": 0.0,
+      "dispersion_ratio": null,
+      "discriminating": false
+    },
+    "padded": {
+      "n_candidates": 5,
+      "mean": 0.0,
+      "stdev": 0.0,
+      "minimum": 0.0,
+      "maximum": 0.0,
+      "dispersion_ratio": null,
+      "discriminating": false
+    },
+    "stripped": {
+      "n_candidates": 5,
+      "mean": 0.0,
+      "stdev": 0.0,
+      "minimum": 0.0,
+      "maximum": 0.0,
+      "dispersion_ratio": null,
+      "discriminating": false
+    },
+    "intact": {
+      "n_candidates": 4,
+      "mean": 0.5,
+      "stdev": 0.5773502691896257,
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "dispersion_ratio": 1.259881576697424,
+      "discriminating": true
+    },
+    "control": {
+      "n_candidates": 5,
+      "mean": 0.0,
+      "stdev": 0.0,
+      "minimum": 0.0,
+      "maximum": 0.0,
+      "dispersion_ratio": null,
+      "discriminating": false
+    }
+  },
+  "n_calls": 120
+}

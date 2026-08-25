@@ -1,0 +1,31 @@
+pool: 20 love-tier references
+
+=== Win rates by class (mean across candidates) ===
+      intact: mean win rate 71.0% over 20 candidates with signal
+   truncated: mean win rate 62.0% over 20 candidates with signal
+    shuffled: mean win rate 63.0% over 20 candidates with signal
+      padded: mean win rate 57.0% over 20 candidates with signal
+    stripped: mean win rate 67.0% over 20 candidates with signal
+     control: mean win rate 66.0% over 20 candidates with signal
+
+=== Spread check per class (score_spread) ===
+   truncated: n=20 spread 0.0%-100.0% (sd 0.355, 1.63x sampling noise) discriminating=True
+    shuffled: n=20 spread 0.0%-100.0% (sd 0.236, 1.09x sampling noise) discriminating=False
+      padded: n=20 spread 0.0%-80.0% (sd 0.292, 1.32x sampling noise) discriminating=True
+    stripped: n=20 spread 0.0%-100.0% (sd 0.285, 1.35x sampling noise) discriminating=True
+     control: n=20 spread 0.0%-100.0% (sd 0.291, 1.37x sampling noise) discriminating=True
+      intact: n=20 spread 0.0%-100.0% (sd 0.255, 1.26x sampling noise) discriminating=True
+
+=== Length bias check (the padded probe) ===
+   truncated: length-vs-win-rate correlation -0.32 (n=20) flagged=False
+    shuffled: length-vs-win-rate correlation +0.18 (n=20) flagged=False
+      padded: length-vs-win-rate correlation -0.06 (n=20) flagged=False
+    stripped: length-vs-win-rate correlation -0.35 (n=20) flagged=False
+
+=== Calibrate-style check: love=intact(20) vs okay=<class>(20), nope=empty ===
+   truncated: love(intact)=71.0%  okay(truncated)=62.0%  -> PASS  separation=0.08999999999999997
+    shuffled: love(intact)=71.0%  okay(shuffled)=63.0%  -> PASS  separation=0.07999999999999996
+      padded: love(intact)=71.0%  okay(padded)=57.0%  -> PASS  separation=0.14
+    stripped: love(intact)=71.0%  okay(stripped)=67.0%  -> PASS  separation=0.039999999999999925
+
+wrote /home/user/Hibiscus/validation/01_synthetic_ladder/mock_results.json

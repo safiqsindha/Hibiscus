@@ -1,0 +1,40 @@
+
+=== 1. How many love-tier references does the worked example actually use? ===
+  actual worked_example.py output: 'pool has 5 love-tier references'
+  README prose says 'Builds a five-item love-tier pool' -- consistent with the actual pool size (5). But the output BLOCK quoted under 'Checking that the answer actually worked' talks about 6 candidates (c0..c5), which the actual pool/compare/candidates setup in worked_example.py never produces (it only ever scores 2 candidates, 'strong' and 'weak', never named c0..c5).
+
+=== 2. Does any current script produce the README's exact output block? ===
+README block:
+c0:overall: 50.0% win rate [18.8%, 81.2%] (3/6 decisive pairs, 0 ties)
+c1:overall: 50.0% win rate [18.8%, 81.2%] (3/6 decisive pairs, 0 ties)
+...
+spread across 6 candidates: 50.0%–50.0% (sd 0.000, 0.00x sampling noise)
+warning: win rates are not clearly separated from what pure sampling noise
+would produce — the judge may not be discriminating between these candidates.
+
+NO MATCH: this text does not appear in examples/worked_example.py's output.
+
+Actual examples/worked_example.py output for the two comparable sections:
+  == comparing two candidates against the pool ==
+   strong: win rate 50% [9%, 91%] over 2 decisive pairs (0 tied), order-disagreement 0%
+     weak: win rate 50% [9%, 91%] over 2 decisive pairs (0 tied), order-disagreement 0%
+  
+  == spread: catching a set where nothing separates ==
+  six candidates, each 50%: spread 50%–50%, 0.00x sampling noise
+    -> discriminating: False (this is the failure mode, caught)
+  
+
+=== 3. Are the README's own numbers at least *arithmetically* consistent? ===
+  Wilson(3/6) computed by today's code: 50.0% [0.188, 0.812]
+  README claims: 50.0% [18.8%, 81.2%]
+  matches to 3 decimal places: True
+  So the *numbers*, taken as a Wilson interval for 3 wins out of 6 decisive pairs, are correct under the current formula. The problem is not the arithmetic -- it's that no script in this repo currently generates 6 candidates each drawing exactly 6 decisive pairs with 0 ties. The one place 6-reference synthetic data appears (run_spread_check in worked_example.py) constructs ComparisonRecord objects directly with only ONE order per pair ('candidate_first' only) -- never both orders -- so it never actually exercises the both-orders-resolve-to-one-outcome logic this section is supposed to be demonstrating. It also prints in a completely different format ('six candidates, each 50%: spread 50%-50%, ...') than the README block ('c0:overall: ... (3/6 decisive pairs, 0 ties)'), which matches the CLI's `hibiscus score` print format instead (see src/hibiscus/cli/score_cmd.py). That means the README block was authored by hand to *look like* real CLI output, not captured from an actual run of anything currently in this repo.
+
+=== 4. Is MockJudge order-independent? (does '0 ties' make sense for it?) ===
+  ran 60 candidates x k=2 references x 2 orders = 240 raw MockJudge calls
+  candidates with ANY order-disagreement: 0/60
+  raw judge-reported 'tie' verdicts: 0
+
+  MockJudge.compare(text_a, text_b, question) computes digest_a = hash(text_a), digest_b = hash(text_b), and picks whichever hash is smaller. Swapping which text is 'a' and which is 'b' swaps which digest is compared, but the *pair* of digests being compared is the same regardless of role assignment -- so the decision is a function of {candidate text, reference text} only, not of order. That means MockJudge (with tie_rate=0, the default) is, contrary to the suspicion, ORDER-INDEPENDENT by construction: order_disagreement should be exactly 0% empirically, matching the measurement above.
+
+  Consequence: '0 ties' in a MockJudge run is plausible and expected, not a red flag. But this is a property of MockJudge specifically (explicitly documented in judge/mock.py's docstring: 'it compares content symmetrically, so it shows no position bias; that is a property of the mock, not evidence about real judges'). Every DEMO that uses MockJudge (worked_example.py, and by extension the README prose built on it) exercises a judge that can never disagree with itself -- 0% order-disagreement in those demos is guaranteed, not measured. The library's own unit tests do separately cover the order-disagreement path correctly, via a dedicated hand-written test double (AlwaysAJudge in tests/test_compare.py) rather than MockJudge, plus hand-built ComparisonRecord fixtures in tests/test_pairs.py. So the *logic* is tested; it's specifically the worked example / README narrative that can never show a real order-disagreement tie, because MockJudge can't produce one.

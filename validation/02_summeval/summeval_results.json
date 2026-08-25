@@ -1,0 +1,58 @@
+{
+  "n_rows": 6400,
+  "n_artifacts": 1600,
+  "hibiscus_matrix": {
+    "coherence": {
+      "coherence": 1.0,
+      "consistency": 0.3150552059687802,
+      "fluency": 0.3843711617516432,
+      "relevance": 0.6597613155808364
+    },
+    "consistency": {
+      "coherence": 0.3150552059687802,
+      "consistency": 1.0,
+      "fluency": 0.4883632934715102,
+      "relevance": 0.412507217491098
+    },
+    "fluency": {
+      "coherence": 0.3843711617516432,
+      "consistency": 0.4883632934715102,
+      "fluency": 1.0,
+      "relevance": 0.36958984895105346
+    },
+    "relevance": {
+      "coherence": 0.6597613155808364,
+      "consistency": 0.412507217491098,
+      "fluency": 0.36958984895105346,
+      "relevance": 1.0
+    }
+  },
+  "scipy_matrix": {
+    "coherence": {
+      "coherence": 1.0,
+      "consistency": 0.3150552059687745,
+      "fluency": 0.3843711617516411,
+      "relevance": 0.6597613155808318
+    },
+    "consistency": {
+      "coherence": 0.3150552059687745,
+      "consistency": 1.0,
+      "fluency": 0.4883632934715008,
+      "relevance": 0.41250721749109814
+    },
+    "fluency": {
+      "coherence": 0.3843711617516411,
+      "consistency": 0.4883632934715008,
+      "fluency": 1.0,
+      "relevance": 0.36958984895105573
+    },
+    "relevance": {
+      "coherence": 0.6597613155808318,
+      "consistency": 0.41250721749109814,
+      "fluency": 0.36958984895105573,
+      "relevance": 1.0
+    }
+  },
+  "redundant_pairs_0.85": [],
+  "max_abs_diff_hibiscus_vs_scipy": 9.381384558082573e-15
+}
