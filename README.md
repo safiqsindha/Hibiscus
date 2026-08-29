@@ -1,9 +1,36 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+    <img src="assets/banner-light.svg" alt="Hibiscus" width="100%">
+  </picture>
+</p>
+
 # Hibiscus
 
-Hibiscus judges generated artifacts the way a jury does: not with a score
-out of five, but by hanging each candidate next to accepted work and asking
-which is better. Rate your candidates into tiers, keep the best as the hung
-set, and score everything after by how often it wins.
+**Judge generated artifacts the way a jury does — not with a score out of five, but by hanging each candidate next to accepted work and asking which is better.**
+
+Rate your candidates into tiers, keep the best as the hung set, and score everything after by how often it wins. Hibiscus is a dependency-free Python library and CLI for pairwise evaluation, with the calibration and saturation checks needed to know whether the answer means anything.
+
+- **Pairwise, not absolute** — judges are measurably more reliable at "which is better?" than at "rate this 0–10", and the dynamic range that absolute rubrics compress away comes back
+- **Position bias controlled by construction** — every comparison is judged in both orders and resolved into a single outcome; ties leave the denominator rather than padding it
+- **It tells you when it isn't working** — calibration exits non-zero if your own `okay`/`nope` items don't rank below `love`, and saturation answers whether the pool is big enough yet
+- **Ships the diagnostic that motivated it** — a dimension-correlation report you can point at any existing rubric's score history to catch redundant judges
+
+![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
+![Python](https://img.shields.io/badge/python-3.10%2B-0891b2?style=flat-square)
+![Dependencies](https://img.shields.io/badge/dependencies-stdlib%20only-DB2777?style=flat-square)
+![Judge](https://img.shields.io/badge/judge-pluggable-DB2777?style=flat-square)
+
+**[Quickstart](#quickstart-cli)** · **[Python API](#python-api)** · **[Judge interface](#judge-interface)** · **[Worked example](examples/worked_example.py)** · **[Non-goals](#non-goals)**
+
+```bash
+pip install -e .
+hibiscus rate    --artifacts candidates.jsonl --pool pools/my-pool.jsonl
+hibiscus compare --candidates new.jsonl --pool pools/my-pool.jsonl --seed 42 --out comparisons.jsonl
+hibiscus score   --comparisons comparisons.jsonl --out scores.json
+```
+
+The default `--judge mock` is deterministic and offline, so the whole pipeline dry-runs without an API key.
 
 ## Why not just score things 0–10?
 
